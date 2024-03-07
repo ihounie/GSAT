@@ -53,11 +53,11 @@ class ReGSAT(nn.Module):
         self.info_loss_multiplier =  self.info_loss_coef
         self.prox_loss_multiplier = self.pred_loss_coef
         # constraint levels
-        self.prox_loss_tol= method_config['prox_loss_tol']
-        self.info_loss_tol = method_config['info_loss_tol']
+        self.prox_loss_tol= method_config['prox_loss_tol'] if 'prox_loss_tol' in method_config else 0
+        self.info_loss_tol = method_config['info_loss_tol'] if 'info_loss_tol' in method_config else 0
         # Dual optim parameters
-        self.dual_lr = method_config['dual_lr']
-        self.resilient_alpha = method_config['resilient_alpha']
+        self.dual_lr = method_config['dual_lr'] if 'dual_lr' in method_config else 0
+        self.resilient_alpha = method_config['resilient_alpha'] if 'resilient_alpha' in method_config else 1
 
         ################################
 
@@ -415,7 +415,7 @@ def train_gsat_one_seed(local_config, data_dir, log_dir, model_name, dataset_nam
 
     print('====================================')
     print('[INFO] Training GSAT...')
-    gsat = GSAT(model, extractor, optimizer, scheduler, writer, device, log_dir, dataset_name, num_class, aux_info['multi_label'], random_state, method_config, shared_config)
+    gsat = ReGSAT(model, extractor, optimizer, scheduler, writer, device, log_dir, dataset_name, num_class, aux_info['multi_label'], random_state, method_config, shared_config)
     metric_dict = gsat.train(loaders, test_set, metric_dict, model_config.get('use_edge_attr', True))
     writer.add_hparams(hparam_dict=hparam_dict, metric_dict=metric_dict)
     return hparam_dict, metric_dict

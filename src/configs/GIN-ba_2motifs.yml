@@ -33,3 +33,10 @@ GSAT_config:
   decay_interval: 10
   decay_r: 0.1
   final_r: 0.5
+
+  dual_learning_rate: 1.0e-1
+  resilient_alpha: 2.0
+  prox_loss_tol: 0.01
+  info_loss_tol: 0.2
+
+
