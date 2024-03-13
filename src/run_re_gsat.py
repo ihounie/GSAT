@@ -73,7 +73,7 @@ class ReGSAT(nn.Module):
     def __loss__(self, att, clf_logits, expl_clf_logits, clf_labels, epoch):
         pred_loss = self.criterion(clf_logits, clf_labels)
 
-        prox_loss = self.criterion(expl_clf_logits, clf_labels)
+        prox_loss = self.criterion(expl_clf_logits, clf_logits)
 
         r = self.fix_r if self.fix_r else self.get_r(self.decay_interval, self.decay_r, epoch, final_r=self.final_r, init_r=self.init_r)
         info_loss = (att * torch.log(att/r + 1e-6) + (1-att) * torch.log((1-att)/(1-r+1e-6) + 1e-6)).mean()
