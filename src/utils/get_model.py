@@ -27,7 +27,10 @@ class Criterion(nn.Module):
         if self.num_class == 2 and not self.multi_label:
             loss = F.binary_cross_entropy_with_logits(logits, targets.float())
         elif self.num_class > 2 and not self.multi_label:
-            loss = F.cross_entropy(logits, targets.long())
+            try:
+                loss = F.cross_entropy(logits, targets.long())
+            except RuntimeError:
+                loss = F.cross_entropy(logits, targets)
         else:
             is_labeled = targets == targets  # mask for labeled data
             loss = F.binary_cross_entropy_with_logits(logits[is_labeled], targets[is_labeled].float())
