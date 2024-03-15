@@ -82,8 +82,13 @@ class ReGSAT(nn.Module):
 
         # (IH) I keep the scale the objective by the same way as the original GSAT
         # to avoid having to re-tune the learning rate too much
+        # pred_loss = pred_loss * self.pred_loss_coef
+        # loss = self.pred_loss_coef*pred_loss + self.info_loss_multiplier*info_loss + self.prox_loss_multiplier*prox_loss
+        # loss_dict = {'loss': loss.item(), 'pred': pred_loss.item(), 'info': info_loss.item(), 'prox': prox_loss.item()}
         pred_loss = pred_loss * self.pred_loss_coef
-        loss = self.pred_loss_coef*pred_loss + self.info_loss_multiplier*info_loss + self.prox_loss_multiplier*prox_loss
+        info_loss = info_loss * self.info_loss_coef
+        prox_loss = prox_loss * self.prox_loss_multiplier
+        loss = pred_loss + info_loss + prox_loss
         loss_dict = {'loss': loss.item(), 'pred': pred_loss.item(), 'info': info_loss.item(), 'prox': prox_loss.item()}
         return loss, loss_dict
     
@@ -109,8 +114,8 @@ class ReGSAT(nn.Module):
         else:
             edge_att = self.lift_node_att_to_edge_att(att, data.edge_index)
 
+        clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=edge_att)
         expl_clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=edge_att)
-        clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=None)
         loss, loss_dict = self.__loss__(att, clf_logits, expl_clf_logits, data.y, epoch)
         return edge_att, loss, loss_dict, clf_logits
 
