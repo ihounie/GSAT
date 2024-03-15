@@ -58,15 +58,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN conda install -y pytorch==1.10.0 torchvision cudatoolkit=11.3 -c pytorch
 RUN pip3 install torch-scatter==2.0.9 torch-sparse==0.6.12 torch-cluster==1.5.9 torch-spline-conv==1.2.1 torch-geometric==2.0.3 -f https://data.pyg.org/whl/torch-1.10.0+cu113.html
-RUN pip3 install ogb==1.3.2 tensorboard==2.7.0 rdkit-pypi==2021.9.4 jupyter==1.0 && \ 
-                matplotlib==3.4.3 networkx==2.6.3 numpy==1.21.2 PyYAML==6.0 && \
-                scikit_learn==1.0.2 scipy==1.7.1 tqdm==4.62.3 && \
-                matplotlib==3.8.3 protobuf==3.20.3
-
-# RUN apt-get install tini
-# RUN chmod +x /usr/bin/tini
-# ENTRYPOINT ["/usr/bin/tini", "--"]
-# CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
-
 COPY . /app
+WORKDIR /app
+RUN pip3 install -r requirements.txt
 ENV DEVCONTAINER=true
