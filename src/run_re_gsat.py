@@ -82,9 +82,6 @@ class ReGSAT(nn.Module):
 
         # (IH) I keep the scale the objective by the same way as the original GSAT
         # to avoid having to re-tune the learning rate too much
-        # pred_loss = pred_loss * self.pred_loss_coef
-        # loss = self.pred_loss_coef*pred_loss + self.info_loss_multiplier*info_loss + self.prox_loss_multiplier*prox_loss
-        # loss_dict = {'loss': loss.item(), 'pred': pred_loss.item(), 'info': info_loss.item(), 'prox': prox_loss.item()}
         pred_loss = pred_loss * self.pred_loss_coef
         info_loss = info_loss * self.info_loss_coef
         prox_loss = prox_loss * self.prox_loss_multiplier
