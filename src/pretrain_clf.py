@@ -82,8 +82,8 @@ def run_one_epoch(dataset_name, data_loader, model, criterion, optimizer, epoch,
     run_one_batch = train_one_batch if phase == 'train' else eval_one_batch
     phase = 'test ' if phase == 'test' else phase  # align tqdm desc bar
 
-    pbar = tqdm(data_loader)
-    for idx, data in enumerate(pbar):
+    # pbar = tqdm(data_loader)
+    for idx, data in enumerate(data_loader):
         data = process_data(data, use_edge_attr)
         loss, logits, targets = run_one_batch(data.to(device), model, criterion, optimizer)
         preds = get_preds(logits, multi_label)
@@ -107,7 +107,7 @@ def run_one_epoch(dataset_name, data_loader, model, criterion, optimizer, epoch,
                 desc += f'auroc: {auroc:.3f}'
                 writer.add_scalar(f'clf/{phase}/auroc', auroc, epoch)
 
-        pbar.set_description(desc)
+        # pbar.set_description(desc)
     return auroc if auroc is not None else all_acc, np.mean(all_batch_losses)
 
 

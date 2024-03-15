@@ -140,8 +140,8 @@ class ReGSAT(nn.Module):
 
         all_loss_dict = {}
         all_exp_labels, all_att, all_clf_labels, all_clf_logits, all_precision_at_k = ([] for i in range(5))
-        pbar = tqdm(data_loader)
-        for idx, data in enumerate(pbar):
+        # pbar = tqdm(data_loader)
+        for idx, data in enumerate(data_loader):
             data = process_data(data, use_edge_attr)
             att, loss_dict, clf_logits = run_one_batch(data.to(self.device), epoch)
 
@@ -163,7 +163,7 @@ class ReGSAT(nn.Module):
                     all_loss_dict[k] = v / loader_len
                 desc, att_auroc, precision, clf_acc, clf_roc, avg_loss = self.log_epoch(epoch, phase, all_loss_dict, all_exp_labels, all_att,
                                                                                         all_precision_at_k, all_clf_labels, all_clf_logits, batch=False)
-            pbar.set_description(desc)
+            # pbar.set_description(desc)
         return att_auroc, precision, clf_acc, clf_roc, avg_loss
 
     def train(self, loaders, test_set, metric_dict, use_edge_attr):
