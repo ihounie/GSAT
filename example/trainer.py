@@ -230,7 +230,7 @@ def visualize_a_graph(edge_index, edge_att, node_label, dataset_name, ax, coor=N
         nx.draw_networkx_edges(G, pos, width=1, edge_color='gray', arrows=False, alpha=0.1, ax=ax, connectionstyle='arc3,rad=0.4')
 
 
-def train_model(model_config, method_config, method, loaders, dataset_name, seed, aux_info):
+def train_model(model_config, method_config, method, loaders):
     metrics = {
       'train': {'att_auroc': [], 'clf_acc': [], 'clf_roc': [], 'avg_loss': []},
       'valid': {'att_auroc': [], 'clf_acc': [], 'clf_roc': [], 'avg_loss': []},
@@ -242,17 +242,17 @@ def train_model(model_config, method_config, method, loaders, dataset_name, seed
         _, 
         train_clf_acc, 
         train_clf_roc, 
-        train_avg_loss) = run_one_epoch(method, loaders['train'], epoch, 'train', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+        train_avg_loss) = method.run_one_epoch(loaders['train'], epoch, 'train', use_edge_attr)
         (val_att_auroc, 
         _, 
         val_clf_acc, 
         val_clf_roc, 
-        val_avg_loss) = run_one_epoch(method, loaders['valid'], epoch, 'valid', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+        val_avg_loss) = method.run_one_epoch(loaders['valid'], epoch, 'valid', use_edge_attr)
         (test_att_auroc, 
         _, 
         test_clf_acc, 
         test_clf_roc, 
-        test_avg_loss) = run_one_epoch(method, loaders['test'], epoch, 'test', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+        test_avg_loss) = method.run_one_epoch(loaders['test'], epoch, 'test', use_edge_attr)
 
         metrics['train']['att_auroc'].append(train_att_auroc)
         metrics['train']['clf_acc'].append(train_clf_acc)
