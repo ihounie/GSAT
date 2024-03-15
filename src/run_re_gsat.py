@@ -53,6 +53,7 @@ class ReGSAT(nn.Module):
         # initialize multipliers to paper coefficients
         self.info_loss_multiplier =  self.info_loss_coef
         self.prox_loss_multiplier = self.prox_loss_multiplier_init
+        self.multiplier_history = {'info': [], 'prox': []}
         # constraint levels
         self.prox_loss_tol= method_config['prox_loss_tol'] if 'prox_loss_tol' in method_config else 0
         self.info_loss_tol = method_config['info_loss_tol'] if 'info_loss_tol' in method_config else 0
@@ -95,6 +96,9 @@ class ReGSAT(nn.Module):
         # clip the multipliers
         self.info_loss_multiplier = max(0, self.info_loss_multiplier)
         self.prox_loss_multiplier = max(0, self.prox_loss_multiplier)
+        # save the multipliers
+        self.multiplier_history['info'].append(self.info_loss_multiplier)
+        self.multiplier_history['prox'].append(self.prox_loss_multiplier)
 
     def forward_pass(self, data, epoch, training):
         emb = self.clf.get_emb(data.x, data.edge_index, batch=data.batch, edge_attr=data.edge_attr)
