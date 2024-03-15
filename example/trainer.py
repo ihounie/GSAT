@@ -43,8 +43,8 @@ def run_one_epoch(gsat, data_loader, epoch, phase, dataset_name, seed, use_edge_
 
     all_loss_dict = {}
     all_exp_labels, all_att, all_clf_labels, all_clf_logits = ([] for i in range(4))
-    pbar = tqdm(data_loader)
-    for idx, data in enumerate(pbar):
+    # pbar = tqdm(data_loader)
+    for idx, data in enumerate(data_loader):
         data = process_data(data, use_edge_attr)
         att, loss_dict, clf_logits = run_one_batch(gsat, data.to(gsat.device), epoch)
 
@@ -65,7 +65,7 @@ def run_one_epoch(gsat, data_loader, epoch, phase, dataset_name, seed, use_edge_
                 all_loss_dict[k] = v / loader_len
             desc, att_auroc, clf_acc, clf_roc, avg_loss = log_epoch(epoch, phase, all_loss_dict, all_exp_labels, all_att, all_clf_labels, all_clf_logits,
                                                                     dataset_name, seed, multi_label, batch=False)
-        pbar.set_description(desc)
+        # pbar.set_description(desc)
     return att_auroc, None, clf_acc, clf_roc, avg_loss
 
 
@@ -228,3 +228,71 @@ def visualize_a_graph(edge_index, edge_att, node_label, dataset_name, ax, coor=N
         nx.draw_networkx_edges(G, pos, width=1, edge_color='gray', arrows=False, alpha=0.1, ax=ax)
     else:
         nx.draw_networkx_edges(G, pos, width=1, edge_color='gray', arrows=False, alpha=0.1, ax=ax, connectionstyle='arc3,rad=0.4')
+
+
+def train_model(model_config, method_config, method, loaders, dataset_name, seed, aux_info):
+    metrics = {
+      'train': {'att_auroc': [], 'clf_acc': [], 'clf_roc': [], 'avg_loss': []},
+      'valid': {'att_auroc': [], 'clf_acc': [], 'clf_roc': [], 'avg_loss': []},
+      'test': {'att_auroc': [], 'clf_acc': [], 'clf_roc': [], 'avg_loss': []}
+    }
+    use_edge_attr = model_config.get('use_edge_attr', True)
+    for epoch in tqdm(range(method_config["epochs"])):
+        (train_att_auroc, 
+        _, 
+        train_clf_acc, 
+        train_clf_roc, 
+        train_avg_loss) = run_one_epoch(method, loaders['train'], epoch, 'train', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+        (val_att_auroc, 
+        _, 
+        val_clf_acc, 
+        val_clf_roc, 
+        val_avg_loss) = run_one_epoch(method, loaders['valid'], epoch, 'valid', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+        (test_att_auroc, 
+        _, 
+        test_clf_acc, 
+        test_clf_roc, 
+        test_avg_loss) = run_one_epoch(method, loaders['test'], epoch, 'test', dataset_name, seed, use_edge_attr, aux_info['multi_label'])
+
+        metrics['train']['att_auroc'].append(train_att_auroc)
+        metrics['train']['clf_acc'].append(train_clf_acc)
+        metrics['train']['clf_roc'].append(train_clf_roc)
+        metrics['train']['avg_loss'].append(train_avg_loss)
+        metrics['valid']['att_auroc'].append(val_att_auroc)
+        metrics['valid']['clf_acc'].append(val_clf_acc)
+        metrics['valid']['clf_roc'].append(val_clf_roc)
+        metrics['valid']['avg_loss'].append(val_avg_loss)
+        metrics['test']['att_auroc'].append(test_att_auroc)
+        metrics['test']['clf_acc'].append(test_clf_acc)
+        metrics['test']['clf_roc'].append(test_clf_roc)
+        metrics['test']['avg_loss'].append(test_avg_loss)
+
+    return metrics
+
+
+def plot_metrics(metrics):
+    fig, ax = plt.subplots(1, 3, figsize=(12, 3))
+
+    ax[0].plot(metrics['train']['att_auroc'], label='Train')
+    ax[0].plot(metrics['valid']['att_auroc'], label='Val')
+    ax[0].plot(metrics['test']['att_auroc'], label='Test')
+    ax[0].set_title('Attention AUROC')
+
+    ax[1].plot(metrics['train']['clf_acc'], label='Train')
+    ax[1].plot(metrics['valid']['clf_acc'], label='Val')
+    ax[1].plot(metrics['test']['clf_acc'], label='Test')
+    ax[1].set_title('Classifier Accuracy')
+
+    # ax[2].plot(metrics['train']['clf_roc'], label='Train')
+    # ax[2].plot(metrics['valid']['clf_roc'], label='Val')
+    # ax[2].plot(metrics['test']['clf_roc'], label='Test')
+    # ax[2].set_ylabel('Classifier AUROC')
+
+    ax[2].plot(metrics['train']['avg_loss'], label='Train')
+    ax[2].plot(metrics['valid']['avg_loss'], label='Val')
+    ax[2].plot(metrics['test']['avg_loss'], label='Test')
+    ax[2].set_title('Average Loss')
+
+    # Put a common legend at the bottom of all the plots
+    ax[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=3)
+    plt.show()
