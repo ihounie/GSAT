@@ -47,11 +47,12 @@ class ReGSAT(nn.Module):
         self.epochs = method_config['epochs']
         self.pred_loss_coef = method_config['pred_loss_coef']
         self.info_loss_coef = method_config['info_loss_coef']
+        self.prox_loss_multiplier_init = method_config['prox_loss_multiplier_init']
         ################################
         # IH: (We added this)
         # initialize multipliers to paper coefficients
         self.info_loss_multiplier =  self.info_loss_coef
-        self.prox_loss_multiplier = self.pred_loss_coef
+        self.prox_loss_multiplier = self.prox_loss_multiplier_init
         # constraint levels
         self.prox_loss_tol= method_config['prox_loss_tol'] if 'prox_loss_tol' in method_config else 0
         self.info_loss_tol = method_config['info_loss_tol'] if 'info_loss_tol' in method_config else 0
