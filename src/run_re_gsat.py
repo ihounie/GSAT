@@ -115,7 +115,7 @@ class ReGSAT(nn.Module):
         else:
             edge_att = self.lift_node_att_to_edge_att(att, data.edge_index)
 
-        clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=edge_att)
+        clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=None)
         expl_clf_logits = self.clf(data.x, data.edge_index, data.batch, edge_attr=data.edge_attr, edge_atten=edge_att)
         loss, loss_dict = self.__loss__(att, clf_logits, expl_clf_logits, data.y, epoch)
         return edge_att, loss, loss_dict, clf_logits
