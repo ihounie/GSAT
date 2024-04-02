@@ -15,6 +15,7 @@ from torch_geometric.utils import subgraph, is_undirected
 from ogb.graphproppred import Evaluator
 from sklearn.metrics import roc_auc_score
 from rdkit import Chem
+import torch.nn.functional as F
 
 from pretrain_clf import train_clf_one_seed
 from utils import Writer, Criterion, MLP, visualize_a_graph, save_checkpoint, load_checkpoint, get_preds, get_lr, set_seed, process_data
@@ -74,8 +75,7 @@ class ReGSAT(nn.Module):
 
     def __loss__(self, att, clf_logits, expl_clf_logits, clf_labels, epoch):
         pred_loss = self.criterion(clf_logits, clf_labels)
-
-        prox_loss = self.criterion(expl_clf_logits, clf_logits)
+        prox_loss =  self.criterion(expl_clf_logits, F.softmax(clf_logits, dim=1))
 
         r = self.fix_r if self.fix_r else self.get_r(self.decay_interval, self.decay_r, epoch, final_r=self.final_r, init_r=self.init_r)
         info_loss = (att * torch.log(att/r + 1e-6) + (1-att) * torch.log((1-att)/(1-r+1e-6) + 1e-6)).mean()
